@@ -37,7 +37,7 @@ function tag() {
   return new Promise(function(resolve) {
 
     shell.exec('git add .');
-    shell.exec('git commit -m "v' + context.meta.version + '"');
+    shell.exec('git commit -m "v' + context.meta.version + (context.meta.message ? ': ' + context.meta.message + '"': '"'));
     shell.exec('git tag -a v' + context.meta.version + ' -m "v' + context.meta.version + '"');
 
     resolve();
@@ -136,11 +136,17 @@ function prompt() {
 
       }
 
+    },
+    {
+      type: 'input',
+      name: 'message',
+      message: '(Optional) Enter a commit message'
     }
   ];
 
   return inquirer.prompt(questions).then(function(answers) {
     context.meta.version = answers.bump !== 'other' ? answers.bump : answers.version;
+    context.meta.message = answers.message;
   });
 
 }
