@@ -18,10 +18,12 @@ function warning() {
 
 function web() {
 
-  var Server = require('../hapi');
-  var server = new Server();
+  // var Server = require('../hapi');
+  // var server = new Server();
 
-  return server.start();
+  var webpack = require('../webpack');
+
+  return webpack.startServer();
 
 }
 

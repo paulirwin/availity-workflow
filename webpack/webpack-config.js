@@ -1,7 +1,6 @@
 var webpack = require('webpack');
 var path = require('path');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var BowerWebpackPlugin = require('bower-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var BlessPlugin = require('bless-webpack-plugin');
 var WebpackMd5Hash = require('webpack-md5-hash');
@@ -10,10 +9,6 @@ var context = require('../context');
 var helper = require('./helper');
 
 var wpProjectPath = path.join(process.cwd(), 'project/app');
-
-function resolveBower(componentPath) {
-  return path.join(process.cwd(), '/bower_components', componentPath);
-}
 
 function getVersion() {
   return context.meta.version;
@@ -55,24 +50,12 @@ var config = {
   watch: false,
 
   noParse: [
-    /.*bower_components.*/
+    /.*node_modules.*/
   ],
 
   resolve: {
     root: [wpProjectPath],
-    modulesDirectories: ['bower_components', 'node_modules'],
-    extensions: ['', '.js', '.jsx', '.css', '.less'],
-    alias: {
-      'jquery.ui.widget': resolveBower('blueimp-file-upload/js/vendor/jquery.ui.widget.js'),
-      'load-image': resolveBower('blueimp-load-image/js/load-image.js'),
-      'load-image-meta': resolveBower('blueimp-load-image/js/load-image-meta'),
-      'load-image-exif': resolveBower('blueimp-load-image/js/load-image-exif'),
-      'load-image-ios': resolveBower('blueimp-load-image/js/load-image-ios'),
-      'canvas-to-blob': resolveBower('blueimp-canvas-to-blob/js/canvas-to-blob'),
-      'tmpl': resolveBower('blueimp-tmpl/js/tmpl'),
-      'blueimp-file-upload-angular': resolveBower('blueimp-file-upload/js/jquery.fileupload-angular'),
-      'lodash': 'lodash-compat'
-    }
+    extensions: ['', '.js', '.jsx', '.css', '.less']
   },
 
   resolveLoader: {
@@ -115,8 +98,20 @@ var config = {
       },
       {test: /\.(jpe?g|png|gif)$/, loader: 'file?name=images/[name].[ext]'},
       {test: /\.html$/, loader: 'html'},
-      {test: /\.json$/, loader: 'json-loader'}
-
+      {test: /\.json$/, loader: 'json-loader'},
+      {
+        test: /\.jsx?$/,
+        loader: 'babel',
+        exclude: /(node_modules|bower_components)/,
+        query: {
+          presets: [
+            'es2015',
+            'react',
+            'stage-3'
+          ],
+          cacheDirectory: true
+        }
+      }
     ]
   },
 
@@ -125,21 +120,7 @@ var config = {
     // ignore all the moment local files
     new webpack.IgnorePlugin(/^\.\/locale$/, [/moment$/]),
 
-    new BowerWebpackPlugin({
-      excludes: [
-        /.*\.(less|map)/,
-        /glyphicons-.*\.(eot|svg|ttf|woff)/,
-        /bootstrap.*\.css/,
-        /select2.*\.(png|gif|css)/
-      ]
-    }),
-
     new WebpackMd5Hash(),
-
-    new webpack.optimize.CommonsChunkPlugin({
-      name: ['vendor'],
-      minChunks: Infinity
-    }),
 
     new webpack.ProvidePlugin({
       $: 'jquery',
