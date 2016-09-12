@@ -44,6 +44,16 @@ function web() {
       Logger.info('Started compiling');
     });
 
+    compiler.plugin('failed', err => {
+      Logger.failed(err);
+    });
+
+    compiler.plugin('compilation', compilation => {
+      compilation.plugin('failed-module', err => {
+        Logger.failed(err.error.error);
+      });
+    });
+
     const openBrowser = _.once(() => open());
 
     _.onceEvery = function(times, func) {
@@ -64,7 +74,7 @@ function web() {
     //
     // https://blogs.msdn.microsoft.com/ieinternals/2011/05/14/stylesheet-limits-in-internet-explorer
     //
-    const message = _.onceEvery(2, stats => {
+    const message = stats => {
 
       openBrowser();
 
@@ -83,7 +93,7 @@ function web() {
       Logger.ok('Finished compiling');
       Logger.box(`The app is running at ${chalk.green(uri)}`);
 
-    });
+    };
 
     compiler.plugin('done', stats => {
 
